@@ -1,0 +1,670 @@
+{
+	"info": {
+		"_postman_id": "a2e64238-9c95-42d5-9f98-585aa1b4a64d",
+		"name": "Automated Software Testing with Python",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38018946"
+	},
+	"item": [
+		{
+			"name": "{{url}}/register",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.unset(\"access_token\");",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"  pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.test(\"User successfully created\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.equal(\"User successfully created\");",
+							"});",
+							"",
+							"pm.test(\"Content-Type is present\", function (){var postman = pm.response.headers.has(\"Content-Type\");",
+							"pm.expect(postman).to.be.true;});",
+							"",
+							"pm.test(\"Content-Type is correct\", function (){var content_type = pm.response.headers.get(\"Content-Type\");",
+							"pm.expect(content_type).to.be.equal(\"application/json\");});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let userCount = pm.environment.get('userCount') || 1;",
+							"",
+							"// Generate a new username",
+							"let newUsername = \"user\" + userCount;",
+							"",
+							"// Set the new username and increment the userCount in the environment",
+							"pm.environment.set('username', newUsername);",
+							"pm.environment.set('userCount', ++userCount);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Transfer-Encoding",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"qwerty\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/register",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/auth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(pm.response.text())",
+							"pm.environment.set(\"access_token\", jsonData.access_token);",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Body has an access_token\", function () {",
+							"    pm.expect(pm.response.json()).to.have.property('access_token');",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.unset(\"access_token\");"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"user1\",\n    \"password\": \"qwerty\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/auth",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/store/<name>",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Create item successfully\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.expect(jsonData).to.have.property('name','lidl'); // Adjust as needed",
+							"});",
+							"",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"// Test for store already exists",
+							"/*pm.test(\"Store already exists: should fail if store has just been created\", function () {",
+							"    pm.response.to.have.status(400);",
+							"    var jsonData = pm.response.json();",
+							"    ",
+							"    pm.expect(jsonData).to.have.property('message').that.includes(\"already exists\");",
+							"});*/",
+							"",
+							"pm.test(\"New stores should have no items\", function () {",
+							"    var jsonData = pm.response.json();",
+							"",
+							"    // Assert that the items array is empty",
+							"    pm.expect(jsonData.items).to.be.an('array').that.is.empty; ",
+							"})",
+							"",
+							"pm.test(\"Content-Type is correct\", function (){var content_type = pm.response.headers.get(\"Content-Type\");",
+							"pm.expect(content_type).to.be.equal(\"application/json\");});",
+							"",
+							"pm.test(\"Store id is retured\", function () {",
+							"    pm.expect(pm.response.json()).to.be.an('object');",
+							"    pm.expect(pm.response.json()).to.have.property('id');",
+							"});",
+							"",
+							"pm.test(\"Store id equals 1\", function () {",
+							"     pm.expect(jsonData.id).to.equal(1);",
+							"});",
+							"",
+							"pm.environment.set(\"store_id\", jsonData.id)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/store/lidl",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"store",
+						"lidl"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/item/<name>",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Create item successfully\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.expect(jsonData).to.have.property('price'); // Adjust as needed",
+							"});",
+							"",
+							"pm.test(\"Item name is returned\", function () {",
+							"     pm.expect(jsonData.name).to.eq('soda');",
+							"});",
+							"",
+							"pm.test(\"Item price is returned\", function () {",
+							"     pm.expect(jsonData.price).to.equal(2.24);",
+							"});",
+							"",
+							"pm.test(\"Content-Type is correct\", function (){var content_type = pm.response.headers.get(\"Content-Type\");",
+							"pm.expect(content_type).to.be.equal(\"application/json\");});",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"// Test for item already exists",
+							"/*pm.test(\"Item already exists\", function () {",
+							"    pm.response.to.have.status(400);",
+							"    var jsonData = pm.response.json();",
+							"    ",
+							"    pm.expect(jsonData).to.have.property('message').that.includes(\"already exists\");",
+							"});*/"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"price\": 2.24,\n    \"store_id\": {{store_id}}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/item/soda",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"item",
+						"soda"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/store/<name>",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json()",
+							"console.log(jsonData)",
+							"pm.test(\"Store 'lidl' is returned\", function () {",
+							"    pm.expect(jsonData.id).to.equal(parseInt(pm.environment.get(\"store_id\")))",
+							"});",
+							"",
+							"pm.test(\"Item 'soda' is returned inside 'lidl'\", function () {",
+							"    pm.expect(jsonData.items).to.be.an('array').that.is.not.empty;",
+							"    pm.expect(jsonData.items[0].name).to.equal(\"soda\");",
+							"});",
+							"",
+							"pm.test(\"Item price is returned inside 'lidl'\", function () {",
+							"    pm.expect(jsonData.items).to.be.an('array').that.is.not.empty;",
+							"    pm.expect(jsonData.items[0].price).to.equal(2.24);",
+							"});",
+							"",
+							"pm.test(\"Content-Type is correct\", function (){var content_type = pm.response.headers.get(\"Content-Type\");",
+							"pm.expect(content_type).to.be.equal(\"application/json\");});",
+							"",
+							"pm.test(\"Response time is within acceptable range\", function () {",
+							"  pm.expect(pm.response.responseTime).to.be.below(200); // Updated response time test to 300ms",
+							"});",
+							"",
+							"/*pm.test(\"Check store existence\", function () {",
+							"    var jsonData = pm.response.json(); // Parse the JSON response",
+							"",
+							"    // Define the store name you want to check",
+							"    var targetStoreName = \"kmart\"; // Change this to the name of the store you want",
+							"",
+							"    // Check if the target store name matches",
+							"    if (jsonData.name === targetStoreName) {",
+							"        var targetStoreItems = jsonData.items;",
+							"        ",
+							"        // Log the retrieved items for the target store",
+							"        console.log(\"Items for\", targetStoreName, \":\", targetStoreItems);",
+							"        ",
+							"        // Assert that the target store has items (if applicable)",
+							"        pm.expect(targetStoreItems).to.be.an('array'); // Ensure it has an array of items",
+							"        pm.response.to.have.status(200); // Set status code to 200 if found",
+							"    } else {",
+							"        console.log(\"Store does not exist:\", targetStoreName);",
+							"        ",
+							"        // Check if the message indicates that the store was not found",
+							"        pm.expect(jsonData).to.eql({ name: '', items: [] }); // Adjust this based on expected behavior",
+							"        ",
+							"        // Set status code to 404 if not found",
+							"        pm.response.to.have.status(404);",
+							"    }",
+							"});*/"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/store/lidl",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"store",
+						"lidl"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/item/my_item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"pm.test(\"Contains json with name and price\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    ",
+							"    pm.expect(jsonData).to.be.eql({'name': 'soda', 'price': 2.24});",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/item/soda",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"item",
+						"soda"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/items",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test for successful response",
+							"pm.test(\"Response should be successful\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test for correct structure",
+							"pm.test(\"Response should have 'items' key\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('items');",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"});",
+							"",
+							"// Test for empty items array (when no items exist)",
+							"pm.test(\"Items array should be empty when no items exist\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.items.length).to.equal(0); // Ensure there are no items",
+							"});",
+							"",
+							"// Test for non-empty items array (when items exist)",
+							"pm.test(\"Items array should not be empty when items exist\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    ",
+							"    // This check assumes that in some context, you expect items to exist.",
+							"    if (jsonData.items.length > 0) {",
+							"        pm.expect(jsonData.items.length).to.be.greaterThan(0);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/items",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/stores",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Contains an array of stores\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('stores').that.is.an('array'); // Check if 'stores' is an array",
+							"});",
+							"",
+							"// Test for empty stores array",
+							"pm.test(\"Stores array should be empty when no items exist\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    ",
+							"    // If the stores array is empty, this test should pass",
+							"    pm.expect(jsonData.stores).to.be.empty; // Ensure the stores array is empty",
+							"});",
+							"",
+							"// Test for stores with items if stores exist",
+							"pm.test(\"Stores array should not be empty when there are items\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    ",
+							"    // Assert that the stores array is not empty",
+							"    pm.expect(jsonData.stores.length).to.be.greaterThan(0); // This will fail if stores are empty",
+							"});",
+							"",
+							"pm.test(\"Contains stores with items when stores are present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    ",
+							"    // Only run this test if there are stores",
+							"    if (jsonData.stores.length > 0) {",
+							"        // Filter stores that have items",
+							"        var storesWithItems = jsonData.stores.filter(store => store.items && store.items.length > 0);",
+							"        ",
+							"        console.log(\"All Stores:\", jsonData.stores);",
+							"        console.log(\"Stores with Items:\", storesWithItems);",
+							"        ",
+							"        // Assert that there is at least one store with items",
+							"        pm.expect(storesWithItems.length).to.be.greaterThan(0); // Ensure there is at least one store with items",
+							"    }",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 100ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(100);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/stores",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"stores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/item/my_item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Check item deleted\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('message', 'Item deleted');;",
+							"});",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/item/soda",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"item",
+						"soda"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/store/<name>",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Check store deleted\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('message', 'Store deleted');;",
+							"});",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/store/lidl",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"store",
+						"lidl"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
