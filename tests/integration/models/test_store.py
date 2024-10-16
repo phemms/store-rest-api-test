@@ -45,7 +45,7 @@ class StoreTest(BaseTest):
         store_type = type(store.json())
 
         self.assertIsInstance(store_type, type(dict), 'data structures are unequal')
-        self.assertEqual(store.json(), {'name': 'lidl', 'items': []})
+        self.assertEqual(store.json(), {'id': None, 'name': 'lidl', 'items': []})
 
     def test_store_with_item_json(self):
         with self.app_context():
@@ -56,7 +56,7 @@ class StoreTest(BaseTest):
             item.save_to_db()
 
             store_type = type(store.json())
-            expected_result = {'name': 'Kmart', 'items': [{'name': 'soda', 'price': 2.24}]}
+            expected_result = {'id': 1, 'name': 'Kmart', 'items': [{'name': 'soda', 'price': 2.24}]}
 
             self.assertIsInstance(store_type, type(dict), 'data structures are unequal')
             self.assertEqual(store.json(), expected_result)
